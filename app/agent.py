@@ -4,15 +4,11 @@ from google.adk.agents import LlmAgent
 from google.adk.apps import App
 from google.adk.workflow import Workflow, JoinNode
 import json
-from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List
 from google.adk.workflow import node
 from google.genai import types
 
 from app.tools import fetch_tokenomics_data, fetch_onchain_metrics
-
-class ThreatList(BaseModel):
-    critical_threats: List[str]
 
 class InvalidDataError(Exception):
     """Custom exception raised when workers return malformed or conversational data."""
@@ -31,7 +27,8 @@ tokenomics_risk_agent = LlmAgent(
         "Your entire response must be a valid, parseable JSON array of strings. If no risks are found, return an empty array []. "
         "If you include even one word of conversational text, the system will fail. Output NOTHING except the JSON."
     ),
-    tools=[fetch_tokenomics_data]
+    tools=[fetch_tokenomics_data],
+    output_schema=List[str]
 )
 
 on_chain_risk_agent = LlmAgent(
@@ -47,7 +44,8 @@ on_chain_risk_agent = LlmAgent(
         "Your entire response must be a valid, parseable JSON array of strings. If no risks are found, return an empty array []. "
         "If you include even one word of conversational text, the system will fail. Output NOTHING except the JSON."
     ),
-    tools=[fetch_onchain_metrics]
+    tools=[fetch_onchain_metrics],
+    output_schema=List[str]
 )
 
 risk_synthesis_llm = LlmAgent(
@@ -106,21 +104,23 @@ def _extract_json(text: str) -> str:
 def validate_and_synthesize(node_input: dict) -> str:
     validated_data = {}
     for agent_name, content in node_input.items():
-        if isinstance(content, types.Content):
-            text = "".join(part.text for part in content.parts if part.text)
+        if isinstance(content, (list, dict)):
+            parsed = content
         else:
-            text = str(content)
+            if isinstance(content, types.Content):
+                text = "".join(part.text for part in content.parts if part and part.text) if content.parts else ""
+            else:
+                text = str(content)
 
-        # Strip markdown code fences before parsing
-        text = _extract_json(text)
-            
-        try:
-            parsed = json.loads(text)
-            if not isinstance(parsed, list):
-                raise InvalidDataError(f"Agent {agent_name} returned non-array JSON: {parsed}")
-            validated_data[agent_name] = parsed
-        except json.JSONDecodeError as e:
-            raise InvalidDataError(f"Agent {agent_name} returned malformed data or conversational string: {text}") from e
+            text = _extract_json(text)
+            try:
+                parsed = json.loads(text)
+            except json.JSONDecodeError as e:
+                raise InvalidDataError(f"Agent {agent_name} returned malformed data or conversational string: {text}") from e
+
+        if not isinstance(parsed, list):
+            raise InvalidDataError(f"Agent {agent_name} returned non-array JSON: {parsed}")
+        validated_data[agent_name] = parsed
             
     return json.dumps(validated_data, indent=2)
 
