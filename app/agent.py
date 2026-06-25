@@ -20,7 +20,7 @@ class InvalidDataError(Exception):
 
 tokenomics_risk_agent = LlmAgent(
     name="tokenomics_risk_agent",
-    model="gemini-2.5-flash",
+    model="gemini-2.5-pro",
     instruction=(
         "You are a quantitative tokenomics analyst. Your only job is to identify supply threats. "
         "You will be provided with raw JSON data regarding token allocation, vesting schedules, and upcoming unlocks. "
@@ -36,7 +36,7 @@ tokenomics_risk_agent = LlmAgent(
 
 on_chain_risk_agent = LlmAgent(
     name="on_chain_risk_agent",
-    model="gemini-2.5-flash",
+    model="gemini-2.5-pro",
     instruction=(
         "You are a forensic blockchain investigator. You analyze live on-chain data focusing on liquidity and wallet concentration. "
         "You will be provided with liquidity metrics and holder distributions. "
@@ -52,7 +52,7 @@ on_chain_risk_agent = LlmAgent(
 
 risk_synthesis_llm = LlmAgent(
     name="risk_synthesis_agent",
-    model="gemini-2.5-flash",
+    model="gemini-2.5-pro",
     instruction=(
         "You are the Chief Risk Officer. You receive raw threat arrays from the tokenomics and on-chain agents. "
         "Your job is to synthesize these findings into a final, professional markdown report called 'BlackSwan Risk Report'. "
@@ -65,6 +65,43 @@ risk_synthesis_llm = LlmAgent(
     tools=[]
 )
 
+def _extract_json(text: str) -> str:
+    """Extract JSON from LLM output that may contain code fences, preamble, or duplicated content."""
+    import re
+    text = text.strip()
+
+    # Strategy 1: Direct parse (best case)
+    try:
+        json.loads(text)
+        return text
+    except (json.JSONDecodeError, ValueError):
+        pass
+
+    # Strategy 2: Extract from markdown code fence
+    fence_pattern = r'```(?:json)?\s*\n?(.*?)\n?\s*```'
+    match = re.search(fence_pattern, text, re.DOTALL)
+    if match:
+        candidate = match.group(1).strip()
+        try:
+            json.loads(candidate)
+            return candidate
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+    # Strategy 3: Find the first JSON array in the raw text
+    bracket_pattern = r'(\[.*?\])'
+    match = re.search(bracket_pattern, text, re.DOTALL)
+    if match:
+        candidate = match.group(1).strip()
+        try:
+            json.loads(candidate)
+            return candidate
+        except (json.JSONDecodeError, ValueError):
+            pass
+
+    # Fallback: return stripped text and let the caller handle the error
+    return text
+
 @node
 def validate_and_synthesize(node_input: dict) -> str:
     validated_data = {}
@@ -73,6 +110,9 @@ def validate_and_synthesize(node_input: dict) -> str:
             text = "".join(part.text for part in content.parts if part.text)
         else:
             text = str(content)
+
+        # Strip markdown code fences before parsing
+        text = _extract_json(text)
             
         try:
             parsed = json.loads(text)
