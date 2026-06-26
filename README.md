@@ -25,6 +25,14 @@ Before you begin, ensure you have:
 - **Google Cloud SDK**: For GCP services - [Install](https://cloud.google.com/sdk/docs/install)
 
 
+## Access the Website
+
+The BlackSwan Risk Engine features a dedicated dashboard UI. To access the website directly:
+
+1. **Start the backend:** Run `uv run uvicorn app.fast_api_app:fast_app --host 0.0.0.0 --port 8000` from the root directory.
+2. **Start the frontend:** Navigate to the `frontend/` directory and run `npm run dev`.
+3. **Open your browser:** Navigate to **[http://localhost:3000](http://localhost:3000)** to view the dashboard.
+
 ## Quick Start
 
 Install `agents-cli` and its skills if not already installed:
