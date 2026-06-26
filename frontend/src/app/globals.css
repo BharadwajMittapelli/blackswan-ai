@@ -105,3 +105,23 @@
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
 }
+
+/* ── Animation delay utilities ──────────────────────────────────────── */
+.animation-delay-700 {
+  animation-delay: 700ms;
+}
+
+/* ── Custom scrollbar for sidebar ───────────────────────────────────── */
+aside::-webkit-scrollbar {
+  width: 4px;
+}
+aside::-webkit-scrollbar-track {
+  background: transparent;
+}
+aside::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.15);
+  border-radius: 2px;
+}
+aside::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.3);
+}

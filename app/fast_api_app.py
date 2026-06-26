@@ -1,6 +1,7 @@
 # app/fast_api_app.py
 import uuid
 import logging
+import time
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -43,6 +44,12 @@ fast_app = FastAPI(
     description="Production REST API for the BlackSwan ADK 2.0 crypto risk workflow.",
     version="1.0.0",
 )
+
+# ---------------------------------------------------------------------------
+# Caching
+# ---------------------------------------------------------------------------
+response_cache = {}
+CACHE_TTL = 300
 
 # ---------------------------------------------------------------------------
 # CORS – allow all origins for the MVP, but lock methods to POST + OPTIONS
@@ -90,25 +97,26 @@ async def _run_workflow_async(token_address: str) -> str:
 # ---------------------------------------------------------------------------
 @fast_app.post("/api/v1/analyze")
 async def analyze_token(request: RiskRequest):
-    # Mocking the AI service to bypass regional free-tier restrictions.
-    import asyncio
-    await asyncio.sleep(2) # Simulate network delay
+    token = request.token_address
+    now = time.time()
     
-    mock_report = """# BlackSwan Risk Report
-## 🚨 Threat Analysis: 0x4206931337dc273a630d328dA6441786BfaD668f
-
-### 1. Tokenomics Vulnerabilities
-- **High Founder Allocation**: The deployer wallet holds 30% of the total supply, presenting a massive dump risk.
-- **No Vesting**: There is no locked liquidity or vesting schedule for the team tokens.
-
-### 2. On-Chain Metrics
-- **Liquidity Concentration**: The top 3 wallets hold 85% of the available liquidity.
-- **Honeypot Risk**: The contract contains a hidden `mint` function which allows the creator to infinitely print new tokens and crash the price.
-
-### Conclusion
-**[CRITICAL RISK]** This token has severe centralization and dump risks. Investment is strictly advised against.
-"""
-    return {"status": "success", "report": mock_report}
+    # Check cache
+    if token in response_cache:
+        cached_report, timestamp = response_cache[token]
+        if now - timestamp < CACHE_TTL:
+            return {"status": "success", "report": cached_report, "cached": True}
+            
+    # Run the actual ADK workflow instead of mocking it
+    try:
+        report = await _run_workflow_async(token)
+    except Exception as e:
+        logger.error(f"Error during ADK workflow: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+        
+    # Store in cache
+    response_cache[token] = (report, now)
+    
+    return {"status": "success", "report": report}
 
 # ---------------------------------------------------------------------------
 # Entry point

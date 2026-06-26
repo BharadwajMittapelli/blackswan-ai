@@ -23,7 +23,7 @@ def ttl_cache(ttl_seconds: int = 300):
     return decorator
 
 @ttl_cache(ttl_seconds=300)
-def fetch_tokenomics_data(token_address: str) -> str:
+def fetch_tokenomics_data(token_address: str) -> dict:
     """
     Fetches basic supply metrics and acts as a foundational supply checker.
     """
@@ -59,10 +59,10 @@ def fetch_tokenomics_data(token_address: str) -> str:
         "supply_inflation_overhang": supply_inflation_overhang,
         "vesting_data_status": "UNVERIFIED_ON_CHAIN"
     }
-    return json.dumps(result)
+    return result
 
 @ttl_cache(ttl_seconds=300)
-def fetch_onchain_metrics(token_address: str) -> str:
+def fetch_onchain_metrics(token_address: str) -> dict:
     """
     Fetches live on-chain data focusing on liquidity and volume from DexScreener.
     """
@@ -77,14 +77,14 @@ def fetch_onchain_metrics(token_address: str) -> str:
         response = requests.get(url, timeout=10)
         
         if response.status_code == 429:
-            return json.dumps(default_error)
+            return default_error
             
         response.raise_for_status()
         data = response.json()
         
         pairs = data.get("pairs")
         if not pairs:
-            return json.dumps(default_error)
+            return default_error
             
         primary_pair = pairs[0]
         
@@ -106,7 +106,7 @@ def fetch_onchain_metrics(token_address: str) -> str:
             "volume_to_liquidity_ratio": volume_to_liquidity_ratio,
             "is_liquidity_locked": False
         }
-        return json.dumps(result)
+        return result
         
     except (requests.exceptions.RequestException, ValueError):
-        return json.dumps(default_error)
+        return default_error

@@ -1,5 +1,8 @@
 # app/config.py
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def load_google_api_key() -> str:
     """Safely loads the Google API key from the environment."""
