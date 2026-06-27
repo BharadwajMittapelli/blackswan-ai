@@ -2,6 +2,7 @@
 import json
 import requests
 import time
+from datetime import datetime, timedelta
 from functools import wraps
 
 def ttl_cache(ttl_seconds: int = 300):
@@ -117,6 +118,31 @@ def fetch_holder_analytics(token_address: str) -> dict:
     Simulates forensic analysis of token holder clustering.
     Returns a dictionary with concentration metrics and top holders.
     """
+    import random
+    historical_data = []
+    base_date = datetime(2026, 6, 27)
+    for i in range(30):
+        d = base_date - timedelta(days=29 - i)
+        date_str = d.strftime("%Y-%m-%d")
+        
+        if date_str == "2026-06-15":
+            volume = 5000000
+            tx_count = 2500
+        else:
+            # Seeded for consistency in mock data if we wanted, but random is fine here
+            volume = random.randint(50000, 500000)
+            tx_count = random.randint(100, 800)
+            
+        historical_data.append({
+            "date": date_str,
+            "volume": volume,
+            "tx_count": tx_count
+        })
+        
+    anomalies = [
+        {"date": "2026-06-15", "type": "Insider Clustering", "description": "AI Alert: 5 clustered wallets funded by a single source executed simultaneous transfers."}
+    ]
+
     return {
         "top_100_concentration": 68.57,
         "whale_concentration": 95.52,
@@ -157,5 +183,7 @@ def fetch_holder_analytics(token_address: str) -> dict:
                 "funding_source": "Coinbase 2",
                 "cluster_flag": False
             }
-        ]
+        ],
+        "historical_data": historical_data,
+        "anomalies": anomalies
     }

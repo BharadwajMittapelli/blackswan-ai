@@ -3,6 +3,7 @@
 import RiskGauge from "@/components/risk-gauge";
 import StatGrid from "@/components/stat-grid";
 import InsiderClusteringCard from "@/components/insider-clustering-card";
+import { HistoricalActivityChart } from "@/components/historical-activity-chart";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Terminal } from "lucide-react";
@@ -58,8 +59,11 @@ export default function ResultsView({ data }: ResultsViewProps) {
         </div>
       </div>
 
-      {/* ── Middle Row: Insider Clustering ──────────────────────────── */}
-      <InsiderClusteringCard holders={data.holders} />
+      {/* ── Middle Row: Insider Clustering & Historical Chart ──────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <InsiderClusteringCard holders={data.holders} />
+        <HistoricalActivityChart data={data.historical_data} anomalies={data.anomalies} />
+      </div>
 
       {/* ── Bottom Row: AI Narrative Terminal ───────────────────────── */}
       <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">

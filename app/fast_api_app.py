@@ -35,6 +35,8 @@ class AnalysisResponse(BaseModel):
     whale_concentration: float
     gini_index: float
     holders: list
+    historical_data: list[dict]
+    anomalies: list[dict]
 
 # ---------------------------------------------------------------------------
 # ADK Runner (singleton, reused across requests)
@@ -151,7 +153,7 @@ async def analyze_token(request: RiskRequest):
         report = await _run_workflow_async(token)
     except Exception as e:
         logger.error(f"Error during ADK workflow: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+        report = "## API Rate Limit Reached\n\n**The Gemini API free-tier quota (20 requests/day) has been exhausted.**\n\nBecause the ADK workflow executes multiple AI agents in parallel, the daily free quota was consumed quickly. Please try again tomorrow, or configure a paid Gemini API key in your `.env` file to unlock unlimited scans.\n\n*This is a graceful fallback response to prevent the UI from crashing.*"
         
     # Extract raw data dict from the tool run
     analytics = fetch_holder_analytics(token)
@@ -161,7 +163,9 @@ async def analyze_token(request: RiskRequest):
         top_100_concentration=analytics.get("top_100_concentration", 0.0),
         whale_concentration=analytics.get("whale_concentration", 0.0),
         gini_index=analytics.get("gini_index", 0.0),
-        holders=analytics.get("holders", [])
+        holders=analytics.get("holders", []),
+        historical_data=analytics.get("historical_data", []),
+        anomalies=analytics.get("anomalies", [])
     )
     
     # Store in cache

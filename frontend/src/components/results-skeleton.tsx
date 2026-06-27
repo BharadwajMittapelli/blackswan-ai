@@ -1,7 +1,7 @@
 "use client";
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertTriangle } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 const LOADING_MESSAGES = [
   "Resolving token ticker via DexScreener...",
@@ -25,8 +25,8 @@ export default function ResultsSkeleton({ loadingMsgIndex }: ResultsSkeletonProp
     <div className="flex flex-col gap-5 p-6">
       {/* ── Status bar ─────────────────────────────────────────── */}
       <div className="flex items-center gap-2.5 px-1">
-        <AlertTriangle className="h-4 w-4 text-amber-500 animate-pulse" />
-        <p className="text-amber-600 font-medium text-xs tracking-wide uppercase">
+        <Loader2 className="h-4 w-4 text-[#42705e] animate-spin" />
+        <p className="text-[#42705e] font-medium text-xs tracking-wide uppercase">
           {LOADING_MESSAGES[loadingMsgIndex % LOADING_MESSAGES.length]}
         </p>
       </div>
@@ -54,22 +54,31 @@ export default function ResultsSkeleton({ loadingMsgIndex }: ResultsSkeletonProp
         </div>
       </div>
 
-      {/* ── Middle Row: Clustering skeleton ─────────────────────── */}
-      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
-        <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
-          <Skeleton className="h-4 w-48 bg-gray-100" />
-          <Skeleton className="h-5 w-28 bg-gray-100 rounded-full" />
+      {/* ── Middle Row: Clustering & Chart skeleton ─────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between">
+            <Skeleton className="h-4 w-48 bg-gray-100" />
+            <Skeleton className="h-5 w-28 bg-gray-100 rounded-full" />
+          </div>
+          <div className="p-4 space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex items-center gap-4">
+                <Skeleton className="h-4 w-24 bg-gray-100" />
+                <Skeleton className="h-4 w-12 bg-gray-100" />
+                <Skeleton className="h-4 w-14 bg-gray-100 rounded-full" />
+                <Skeleton className="h-4 w-24 bg-gray-100 flex-1" />
+                <Skeleton className="h-4 w-16 bg-gray-100 rounded-full" />
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="p-4 space-y-3">
-          {[1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="flex items-center gap-4">
-              <Skeleton className="h-4 w-24 bg-gray-100" />
-              <Skeleton className="h-4 w-12 bg-gray-100" />
-              <Skeleton className="h-4 w-14 bg-gray-100 rounded-full" />
-              <Skeleton className="h-4 w-24 bg-gray-100 flex-1" />
-              <Skeleton className="h-4 w-16 bg-gray-100 rounded-full" />
-            </div>
-          ))}
+
+        {/* Chart Skeleton */}
+        <div className="rounded-xl border border-gray-200 bg-white p-5 flex flex-col w-full h-full min-h-[300px]">
+          <Skeleton className="h-3 w-48 bg-gray-100 mb-2" />
+          <Skeleton className="h-2 w-64 bg-gray-100 mb-6" />
+          <Skeleton className="flex-1 w-full bg-gray-50 rounded-lg" />
         </div>
       </div>
 

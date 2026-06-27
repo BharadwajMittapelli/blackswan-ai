@@ -15,7 +15,7 @@ import tenacity
 _genai_client = genai.Client(api_key=app.config.GOOGLE_API_KEY)
 
 @tenacity.retry(
-    wait=tenacity.wait_exponential(multiplier=1, min=2, max=10),
+    wait=tenacity.wait_exponential(multiplier=1, min=2, max=65),
     stop=tenacity.stop_after_attempt(5),
     retry=tenacity.retry_if_exception_type(errors.APIError)
 )
