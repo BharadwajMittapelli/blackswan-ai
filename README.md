@@ -7,12 +7,33 @@ Agent generated with `agents-cli` version `0.5.0`
 
 ```
 blackswan-ai/
-├── app/         # Core agent code
-│   ├── agent.py               # Main agent logic
+├── app/                       # Core agent backend (FastAPI + ADK workflow)
+│   ├── agent.py               # Main ReAct agent workflow logic
+│   ├── config.py              # App configurations and API keys
+│   ├── fast_api_app.py        # FastAPI REST API gateway
+│   ├── tools.py               # On-chain data fetching & mock forensics
 │   └── app_utils/             # App utilities and helpers
+├── frontend/                  # Next.js 15 (App Router) Dashboard
+│   ├── src/
+│   │   ├── app/               # Router pages & global CSS stylesheets
+│   │   ├── components/        # Flyrank-inspired light-theme dashboard panels
+│   │   │   ├── ui/            # Shadcn UI primitives (card, chart, input, button)
+│   │   │   ├── empty-state.tsx
+│   │   │   ├── error-state.tsx
+│   │   │   ├── header.tsx
+│   │   │   ├── historical-activity-chart.tsx
+│   │   │   ├── insider-clustering-card.tsx
+│   │   │   ├── results-skeleton.tsx
+│   │   │   ├── results-view.tsx
+│   │   │   ├── risk-gauge.tsx
+│   │   │   └── stat-grid.tsx
+│   │   └── lib/
+│   │       └── types.ts       # Shared TypeScript type definitions
+│   ├── package.json           # Frontend dependencies (Recharts, Tailwind, etc.)
+│   └── next.config.ts         # Next.js configuration
 ├── tests/                     # Unit, integration, and load tests
 ├── GEMINI.md                  # AI-assisted development guide
-└── pyproject.toml             # Project dependencies
+└── pyproject.toml             # Python backend dependencies
 ```
 
 > 💡 **Tip:** Use [Gemini CLI](https://github.com/google-gemini/gemini-cli) for AI-assisted development - project context is pre-configured in `GEMINI.md`.
