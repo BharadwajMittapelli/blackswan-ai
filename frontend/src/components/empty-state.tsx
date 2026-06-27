@@ -1,6 +1,8 @@
 "use client";
 
-import { ShieldAlert, AlertTriangle, Activity, Lock } from "lucide-react";
+import { ShieldAlert, AlertTriangle, Activity, Lock, Search, ArrowRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const TIPS = [
   {
@@ -8,66 +10,92 @@ const TIPS = [
     title: "Unlock Events",
     description:
       "Large token unlocks (>5% of circulating supply) within 30 days create significant dump risk. Always check vesting schedules.",
-    color: "text-amber-400",
+    color: "text-amber-500",
   },
   {
     icon: Activity,
     title: "Liquidity Traps",
     description:
       "Pools with <$50k liquidity can be easily manipulated. Low liquidity means high slippage and rug-pull exposure.",
-    color: "text-rose-400",
+    color: "text-rose-500",
   },
   {
     icon: Lock,
     title: "Wallet Concentration",
     description:
       "If the top 10 wallets hold >30% of supply, the token is susceptible to coordinated selling pressure.",
-    color: "text-violet-400",
+    color: "text-violet-500",
   },
   {
     icon: ShieldAlert,
-    title: "Contract Risks",
+    title: "Insider Clustering",
     description:
-      "Hidden mint functions, proxy contracts, and unrenounced ownership are all red flags for smart contract security.",
-    color: "text-cyan-400",
+      "Multiple wallets funded by the same source indicate developer bundling — a strong signal for coordinated rug pulls.",
+    color: "text-[#42705e]",
   },
 ];
 
-export default function EmptyState() {
+interface EmptyStateProps {
+  tokenAddress: string;
+  onAddressChange: (val: string) => void;
+  onScan: () => void;
+}
+
+export default function EmptyState({ tokenAddress, onAddressChange, onScan }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center flex-1 px-6 py-16">
-      {/* ── Illustration ──────────────────────────────────────────── */}
-      <div className="relative mb-10">
-        <div className="h-28 w-28 rounded-full bg-gradient-to-br from-[#38BDF8]/10 to-[#818CF8]/10 flex items-center justify-center">
-          <div className="h-20 w-20 rounded-full bg-gradient-to-br from-[#38BDF8]/15 to-[#818CF8]/15 flex items-center justify-center">
-            <ShieldAlert className="h-10 w-10 text-[#38BDF8]/60" strokeWidth={1.2} />
-          </div>
+    <div className="flex flex-col items-center justify-center flex-1 px-6 py-12 md:py-20 w-full max-w-3xl mx-auto">
+      {/* ── Brand Logo Centered ──────────────────────────────────────── */}
+      <div className="flex items-center gap-3 mb-8">
+        <div className="relative">
+          <ShieldAlert className="h-10 w-10 text-[#42705e]" strokeWidth={1.5} />
+          <div className="absolute -top-1 -right-1 h-3 w-3 bg-emerald-500 rounded-full border-[3px] border-white animate-pulse" />
         </div>
-        <div className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-[#818CF8]/20 animate-ping" />
-        <div className="absolute -bottom-2 -left-2 h-4 w-4 rounded-full bg-[#38BDF8]/20 animate-ping animation-delay-700" />
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
+            BlackSwan<span className="text-[#42705e]"> AI</span>
+          </h1>
+          <p className="text-xs uppercase tracking-[0.2em] text-gray-400 font-medium mt-0.5">
+            Risk Command Center
+          </p>
+        </div>
       </div>
 
-      <h2 className="text-2xl font-bold text-[#E2E8F0] mb-2 tracking-tight">
-        Ready to Scan
-      </h2>
-      <p className="text-[#64748B] text-sm text-center max-w-md mb-10">
-        Paste a token contract address above or pick a demo token from the sidebar to generate a full risk analysis.
-      </p>
+      {/* ── Search Bar ──────────────────────────────────────────────── */}
+      <div className="w-full relative flex items-center mb-12 shadow-sm rounded-xl">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+        <Input
+          id="hero-token-input"
+          placeholder="Enter token ticker or contract address (e.g., PEPE, WIF, or 0x...)"
+          value={tokenAddress}
+          onChange={(e) => onAddressChange(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && onScan()}
+          className="pl-12 pr-24 h-14 text-base font-semibold text-gray-900 bg-white border-gray-200 placeholder:text-gray-400 focus-visible:ring-[#42705e]/30 rounded-xl"
+        />
+        <Button
+          onClick={onScan}
+          className="absolute right-1.5 h-11 px-5 text-sm font-semibold bg-[#42705e] hover:bg-[#376251] text-white rounded-lg transition-all duration-200 cursor-pointer shadow-sm"
+        >
+          <span className="flex items-center gap-2">
+            Scan
+            <ArrowRight className="h-4 w-4" />
+          </span>
+        </Button>
+      </div>
 
       {/* ── Risk Tips Grid ────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
         {TIPS.map((tip) => (
           <div
             key={tip.title}
-            className="group p-4 rounded-xl border border-[rgba(148,163,184,0.1)] bg-[#1E293B]/40 hover:bg-[#1E293B]/70 transition-colors duration-200"
+            className="group p-4 rounded-xl border border-gray-200/60 bg-transparent hover:bg-gray-100/30 transition-colors duration-200"
           >
             <div className="flex items-start gap-3">
-              <tip.icon className={`h-5 w-5 mt-0.5 ${tip.color} shrink-0`} strokeWidth={1.5} />
+              <tip.icon className={`h-4 w-4 mt-0.5 ${tip.color} shrink-0`} strokeWidth={1.5} />
               <div>
-                <h3 className="text-sm font-semibold text-[#E2E8F0] mb-1">
+                <h3 className="text-sm font-semibold text-gray-700 mb-1">
                   {tip.title}
                 </h3>
-                <p className="text-[12px] leading-relaxed text-[#64748B]">
+                <p className="text-[11px] leading-relaxed text-gray-400">
                   {tip.description}
                 </p>
               </div>

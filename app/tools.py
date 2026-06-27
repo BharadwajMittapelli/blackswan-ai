@@ -110,3 +110,52 @@ def fetch_onchain_metrics(token_address: str) -> dict:
         
     except (requests.exceptions.RequestException, ValueError):
         return default_error
+
+@ttl_cache(ttl_seconds=300)
+def fetch_holder_analytics(token_address: str) -> dict:
+    """
+    Simulates forensic analysis of token holder clustering.
+    Returns a dictionary with concentration metrics and top holders.
+    """
+    return {
+        "top_100_concentration": 68.57,
+        "whale_concentration": 95.52,
+        "gini_index": 0.9983,
+        "holders": [
+            {
+                "address": "0x1234567890abcdef1234567890abcdef12345678",
+                "balance_pct": 35.0,
+                "tier": "Whale",
+                "funding_source": "0xAbCDeF1234567890AbCDeF1234567890AbCDeF12",
+                "cluster_flag": True
+            },
+            {
+                "address": "0xabcdef1234567890abcdef1234567890abcdef12",
+                "balance_pct": 25.0,
+                "tier": "Whale",
+                "funding_source": "0xAbCDeF1234567890AbCDeF1234567890AbCDeF12",
+                "cluster_flag": True
+            },
+            {
+                "address": "0x9876543210fedcba9876543210fedcba98765432",
+                "balance_pct": 10.0,
+                "tier": "Shark",
+                "funding_source": "0xAbCDeF1234567890AbCDeF1234567890AbCDeF12",
+                "cluster_flag": True
+            },
+            {
+                "address": "0xfedcba0987654321fedcba0987654321fedcba09",
+                "balance_pct": 5.0,
+                "tier": "Shark",
+                "funding_source": "Binance 14",
+                "cluster_flag": False
+            },
+            {
+                "address": "0x1111222233334444555566667777888899990000",
+                "balance_pct": 1.5,
+                "tier": "Crab",
+                "funding_source": "Coinbase 2",
+                "cluster_flag": False
+            }
+        ]
+    }

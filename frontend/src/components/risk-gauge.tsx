@@ -2,72 +2,67 @@
 
 interface RiskGaugeProps {
   score: number;
-  isCritical: boolean;
+  label?: string;
 }
 
-export default function RiskGauge({ score, isCritical }: RiskGaugeProps) {
-  /* ── Gauge math ──────────────────────────────────────────────────── */
+function getTier(score: number) {
+  if (score <= 40) return { color: "#42705e", glow: "animate-teal-glow", label: "LOW RISK", labelClass: "text-[#42705e]" };
+  if (score <= 69) return { color: "#D97706", glow: "animate-amber-glow", label: "MODERATE", labelClass: "text-amber-600" };
+  return { color: "#E11D48", glow: "animate-critical-glow", label: "CRITICAL", labelClass: "text-rose-600" };
+}
+
+export default function RiskGauge({ score, label }: RiskGaugeProps) {
   const radius = 70;
   const circumference = 2 * Math.PI * radius;
-  const clampedScore = Math.max(0, Math.min(100, score));
-  const dashoffset = circumference - (clampedScore / 100) * circumference;
-
-  const gaugeColor = isCritical ? "#EF4444" : "#22C55E";
-  const glowColor = isCritical ? "rgba(239,68,68,0.3)" : "rgba(34,197,94,0.3)";
-  const label = isCritical ? "CRITICAL" : "LOW RISK";
-  const labelColor = isCritical ? "text-red-400" : "text-emerald-400";
+  const clamped = Math.max(0, Math.min(100, score));
+  const dashoffset = circumference - (clamped / 100) * circumference;
+  const tier = getTier(clamped);
 
   return (
     <div className="flex flex-col items-center">
-      <div className="relative w-48 h-48">
+      <div className={`relative w-44 h-44 ${tier.glow}`}>
         <svg className="w-full h-full -rotate-90" viewBox="0 0 160 160">
-          {/* Background circle */}
+          {/* Background track */}
           <circle
-            cx="80"
-            cy="80"
-            r={radius}
+            cx="80" cy="80" r={radius}
             fill="none"
-            stroke="rgba(148,163,184,0.08)"
-            strokeWidth="10"
+            stroke="#F1F5F9"
+            strokeWidth="8"
           />
-          {/* Animated progress arc */}
+          {/* Progress arc */}
           <circle
-            cx="80"
-            cy="80"
-            r={radius}
+            cx="80" cy="80" r={radius}
             fill="none"
-            stroke={gaugeColor}
-            strokeWidth="10"
+            stroke={tier.color}
+            strokeWidth="8"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={dashoffset}
             style={{
-              transition: "stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.5s ease",
-              filter: `drop-shadow(0 0 8px ${glowColor})`,
+              transition: "stroke-dashoffset 1.4s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.5s ease",
             }}
           />
         </svg>
 
-        {/* Center label */}
+        {/* Center value */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span
-            className="text-4xl font-black tabular-nums"
-            style={{ color: gaugeColor, transition: "color 0.5s ease" }}
+            className="text-3xl font-black tabular-nums"
+            style={{ color: tier.color, transition: "color 0.5s ease" }}
           >
-            {clampedScore}
+            {clamped}
           </span>
-          <span className="text-[10px] uppercase tracking-[0.15em] text-[#64748B] font-medium mt-0.5">
+          <span className="text-[9px] uppercase tracking-[0.15em] text-gray-400 font-medium mt-0.5">
             / 100
           </span>
         </div>
       </div>
 
-      {/* Label */}
       <span
-        className={`mt-3 text-xs font-bold uppercase tracking-[0.15em] ${labelColor}`}
+        className={`mt-2 text-[10px] font-bold uppercase tracking-[0.15em] ${tier.labelClass}`}
         style={{ transition: "color 0.5s ease" }}
       >
-        {label}
+        {label ?? tier.label}
       </span>
     </div>
   );

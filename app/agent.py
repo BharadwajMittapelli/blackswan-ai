@@ -7,11 +7,18 @@ import re
 from google.adk.workflow import node
 from google.genai import types
 
-from app.tools import fetch_tokenomics_data, fetch_onchain_metrics
+from app.tools import fetch_tokenomics_data, fetch_onchain_metrics, fetch_holder_analytics
 from google import genai
+from google.genai import errors
+import tenacity
 
 _genai_client = genai.Client(api_key=app.config.GOOGLE_API_KEY)
 
+@tenacity.retry(
+    wait=tenacity.wait_exponential(multiplier=1, min=2, max=10),
+    stop=tenacity.stop_after_attempt(5),
+    retry=tenacity.retry_if_exception_type(errors.APIError)
+)
 def call_gemini(system_prompt: str, user_content: str) -> str:
     response = _genai_client.models.generate_content(
         model='gemini-2.5-flash',
@@ -51,13 +58,25 @@ ONCHAIN_INSTRUCTION = (
     "If you include even one word of conversational text, the system will fail. Output NOTHING except the JSON."
 )
 
+FORENSIC_INSTRUCTION = (
+    "You are a blockchain forensic analyst. You specialize in Insider Clustering and finding developer bundling. "
+    "You will receive JSON data regarding the funding sources of token holders. "
+    "You must flag any insider clustering or suspicious funding patterns. "
+    "Output your findings strictly as a JSON array of critical threat strings. Do not invent data.\n\n"
+    "CRITICAL: You are an API-bound worker. You must NEVER include conversational filler, preambles, or explanations. "
+    "Your entire response must be a valid, parseable JSON array of strings. If no risks are found, return an empty array []. "
+    "If you include even one word of conversational text, the system will fail. Output NOTHING except the JSON."
+)
+
 SYNTHESIS_INSTRUCTION = (
-    "You are the Chief Risk Officer. You receive raw threat arrays from the tokenomics and on-chain agents. "
+    "You are the Chief Risk Officer. You receive raw threat arrays from the tokenomics, on-chain, and forensic clustering agents. "
     "Your job is to synthesize these findings into a final, professional markdown report called 'BlackSwan Risk Report'. "
     "The report must include an executive summary, a breakdown of tokenomics threats, a breakdown of on-chain threats, "
+    "a section explicitly highlighting 'Insider Wallet Clustering & Developer Bundling' based on the forensic data, "
     "and a final 'Risk Score' out of 100 based on the severity of findings.\n\n"
-    "CRITICAL: You are a reporting engine. You will receive structured JSON inputs. You must process these inputs and "
-    "output ONLY a Markdown report. Do not include 'Here is the report' or any introductory/closing text. "
+    "CRITICAL: You are a reporting engine. You will receive structured JSON inputs. You must compile this analysis into ONLY a Markdown report. "
+    "Leave the final payload organization to the FastAPI gateway layer. Do not output anything outside of the markdown text. "
+    "Do not include 'Here is the report' or any introductory/closing text. "
     "Start your response immediately with '# BlackSwan Risk Report'. Ensure the output is strictly formatted markdown."
 )
 
@@ -168,6 +187,23 @@ def onchain_risk_node(node_input) -> str:
 
 
 @node
+def forensic_clustering_agent(node_input) -> str:
+    """Fetch forensic clustering data and analyze it via Gemini."""
+    text = _get_text(node_input)
+    token_address = _extract_token_address(text)
+
+    # Call the tool directly
+    tool_result = fetch_holder_analytics(token_address)
+
+    # Send tool output to Gemini for analysis
+    response = call_gemini(
+        FORENSIC_INSTRUCTION,
+        f"Analyze this holder clustering data:\n{json.dumps(tool_result, indent=2)}"
+    )
+    return response
+
+
+@node
 def validate_and_synthesize(node_input: dict) -> str:
     """Validate worker outputs and merge them into a single JSON payload."""
     validated_data = {}
@@ -211,8 +247,8 @@ join = JoinNode(name="merge")
 root_agent = Workflow(
     name="blackswan_risk_engine",
     edges=[
-        ('START', (tokenomics_risk_node, onchain_risk_node)),
-        ((tokenomics_risk_node, onchain_risk_node), join),
+        ('START', (tokenomics_risk_node, onchain_risk_node, forensic_clustering_agent)),
+        ((tokenomics_risk_node, onchain_risk_node, forensic_clustering_agent), join),
         (join, validate_and_synthesize),
         (validate_and_synthesize, risk_synthesis_node)
     ]

@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, ArrowRight } from "lucide-react";
+import { Search, ArrowRight, ShieldAlert } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -18,29 +18,48 @@ export default function Header({
   onScan,
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 w-full border-b border-[rgba(148,163,184,0.1)] bg-[#0F172A]/80 backdrop-blur-xl">
+    <header className="sticky top-0 z-30 w-full border-b border-gray-200 bg-white/80 backdrop-blur-xl">
       <div className="flex items-center gap-4 px-6 py-3">
+        {/* ── Brand ──────────────────────────────────────────────── */}
+        <div className="flex items-center gap-2.5 mr-4 shrink-0">
+          <div className="relative">
+            <ShieldAlert className="h-7 w-7 text-[#42705e]" strokeWidth={1.5} />
+            <div className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-emerald-500 rounded-full border-2 border-white animate-pulse" />
+          </div>
+          <div>
+            <h1 className="text-base font-bold tracking-tight text-gray-900">
+              BlackSwan<span className="text-[#42705e]"> AI</span>
+            </h1>
+            <p className="text-[9px] uppercase tracking-[0.15em] text-gray-400 font-medium -mt-0.5">
+              Risk Command Center
+            </p>
+          </div>
+        </div>
+
+        {/* ── Search Bar ─────────────────────────────────────────── */}
         <div className="relative flex-1 max-w-2xl">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#64748B]" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             id="token-address-input"
-            placeholder="Paste token contract address (0x…)"
+            placeholder="Enter token ticker or contract address (e.g., PEPE, WIF, or 0x...)"
             value={tokenAddress}
             onChange={(e) => onAddressChange(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && onScan()}
-            className="pl-10 h-11 text-sm bg-[#1E293B]/70 border-[rgba(148,163,184,0.15)] placeholder:text-[#4B5563] focus-visible:ring-[#38BDF8]/40 rounded-xl"
+            className="pl-10 h-10 text-sm font-semibold text-gray-900 bg-gray-50 border-gray-200 placeholder:text-gray-400 focus-visible:ring-[#42705e]/30 rounded-lg"
             disabled={loading}
           />
         </div>
+
+        {/* ── Scan CTA ───────────────────────────────────────────── */}
         <Button
           id="scan-button"
           onClick={onScan}
           disabled={loading}
-          className="h-11 px-5 text-sm font-semibold bg-gradient-to-r from-[#38BDF8] to-[#818CF8] hover:from-[#38BDF8]/90 hover:to-[#818CF8]/90 text-[#0F172A] rounded-xl transition-all duration-200 cursor-pointer shadow-lg shadow-[#38BDF8]/10"
+          className="h-10 px-5 text-sm font-semibold bg-[#42705e] hover:bg-[#376251] text-white rounded-lg transition-all duration-200 cursor-pointer shadow-sm"
         >
           {loading ? (
             <span className="flex items-center gap-2">
-              <span className="h-3.5 w-3.5 border-2 border-[#0F172A] border-t-transparent rounded-full animate-spin" />
+              <span className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               Scanning…
             </span>
           ) : (

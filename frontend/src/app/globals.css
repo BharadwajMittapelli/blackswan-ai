@@ -49,40 +49,40 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* ── Dark Mode Only ─────────────────────────────────────────────────── */
+/* ── Light / Neutral Theme ──────────────────────────────────────────── */
 :root {
-  --background: #0F172A;
-  --foreground: #E2E8F0;
-  --card: #1E293B;
-  --card-foreground: #E2E8F0;
-  --popover: #1E293B;
-  --popover-foreground: #E2E8F0;
-  --primary: #38BDF8;
-  --primary-foreground: #0F172A;
-  --secondary: #1E293B;
-  --secondary-foreground: #E2E8F0;
-  --muted: #1E293B;
-  --muted-foreground: #94A3B8;
-  --accent: #1E293B;
-  --accent-foreground: #E2E8F0;
+  --background: #FFFFFF;
+  --foreground: #1E293B;
+  --card: #FFFFFF;
+  --card-foreground: #1E293B;
+  --popover: #FFFFFF;
+  --popover-foreground: #1E293B;
+  --primary: #42705e;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F1F5F9;
+  --secondary-foreground: #1E293B;
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+  --accent: #F1F5F9;
+  --accent-foreground: #1E293B;
   --destructive: #EF4444;
-  --border: rgba(148, 163, 184, 0.15);
-  --input: rgba(148, 163, 184, 0.2);
-  --ring: #38BDF8;
-  --chart-1: #38BDF8;
-  --chart-2: #818CF8;
-  --chart-3: #A78BFA;
-  --chart-4: #F472B6;
-  --chart-5: #FB923C;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #42705e;
+  --chart-1: #42705e;
+  --chart-2: #6366F1;
+  --chart-3: #8B5CF6;
+  --chart-4: #EC4899;
+  --chart-5: #F97316;
   --radius: 0.625rem;
-  --sidebar: #0F172A;
-  --sidebar-foreground: #E2E8F0;
-  --sidebar-primary: #38BDF8;
-  --sidebar-primary-foreground: #0F172A;
-  --sidebar-accent: #1E293B;
-  --sidebar-accent-foreground: #E2E8F0;
-  --sidebar-border: rgba(148, 163, 184, 0.15);
-  --sidebar-ring: #38BDF8;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #1E293B;
+  --sidebar-primary: #42705e;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F1F5F9;
+  --sidebar-accent-foreground: #1E293B;
+  --sidebar-border: #E2E8F0;
+  --sidebar-ring: #42705e;
 }
 
 @layer base {
@@ -99,11 +99,38 @@
 
 /* ── Pulse glow animation for loading state ─────────────────────────── */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 15px rgba(56, 189, 248, 0.15); }
-  50% { box-shadow: 0 0 30px rgba(56, 189, 248, 0.35); }
+  0%, 100% { box-shadow: 0 0 12px rgba(66, 112, 94, 0.08); }
+  50% { box-shadow: 0 0 24px rgba(66, 112, 94, 0.18); }
 }
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ── Teal gauge glow (healthy) ──────────────────────────────────────── */
+@keyframes teal-glow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(66, 112, 94, 0.2)); }
+  50% { filter: drop-shadow(0 0 14px rgba(66, 112, 94, 0.4)); }
+}
+.animate-teal-glow {
+  animation: teal-glow 2.5s ease-in-out infinite;
+}
+
+/* ── Amber gauge glow (warning) ─────────────────────────────────────── */
+@keyframes amber-glow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.2)); }
+  50% { filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.4)); }
+}
+.animate-amber-glow {
+  animation: amber-glow 2.5s ease-in-out infinite;
+}
+
+/* ── Critical gauge glow (danger) ───────────────────────────────────── */
+@keyframes critical-glow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.2)); }
+  50% { filter: drop-shadow(0 0 14px rgba(244, 63, 94, 0.4)); }
+}
+.animate-critical-glow {
+  animation: critical-glow 2s ease-in-out infinite;
 }
 
 /* ── Animation delay utilities ──────────────────────────────────────── */
@@ -111,17 +138,18 @@
   animation-delay: 700ms;
 }
 
-/* ── Custom scrollbar for sidebar ───────────────────────────────────── */
-aside::-webkit-scrollbar {
-  width: 4px;
+/* ── Custom scrollbar ───────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
-aside::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: transparent;
 }
-aside::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.15);
-  border-radius: 2px;
-}
-aside::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
 }

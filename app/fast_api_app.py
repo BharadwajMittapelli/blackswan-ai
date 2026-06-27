@@ -2,6 +2,8 @@
 import uuid
 import logging
 import time
+import re
+import httpx
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +14,7 @@ from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
 from app.agent import root_agent, InvalidDataError
+from app.tools import fetch_holder_analytics
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -24,7 +27,14 @@ logging.basicConfig(level=logging.INFO)
 # ---------------------------------------------------------------------------
 class RiskRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
-    token_address: str
+    query: str
+
+class AnalysisResponse(BaseModel):
+    markdown_report: str
+    top_100_concentration: float
+    whale_concentration: float
+    gini_index: float
+    holders: list
 
 # ---------------------------------------------------------------------------
 # ADK Runner (singleton, reused across requests)
@@ -93,18 +103,48 @@ async def _run_workflow_async(token_address: str) -> str:
     return final_response
 
 # ---------------------------------------------------------------------------
+# Ticker-Agnostic Input Resolver
+# ---------------------------------------------------------------------------
+async def resolve_query_to_address(query: str) -> str:
+    """Resolve a ticker symbol to a smart contract address if necessary."""
+    # Check if it's an EVM address or Solana address
+    if query.startswith("0x") or (query.isalnum() and 32 <= len(query) <= 44):
+        return query
+        
+    # Attempt to resolve via DexScreener
+    search_url = f"https://api.dexscreener.com/latest/dex/search?q={query}"
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(search_url, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            pairs = data.get("pairs", [])
+            if not pairs:
+                raise HTTPException(status_code=404, detail="Token ticker could not be resolved to a smart contract address.")
+            
+            # Extract the first pair's baseToken address
+            address = pairs[0].get("baseToken", {}).get("address")
+            if not address:
+                raise HTTPException(status_code=404, detail="Token ticker could not be resolved to a smart contract address.")
+                
+            return address
+        except httpx.RequestError as e:
+            logger.error(f"DexScreener API error: {e}")
+            raise HTTPException(status_code=500, detail="Error resolving token ticker.")
+
+# ---------------------------------------------------------------------------
 # POST /api/v1/analyze – the single entry point
 # ---------------------------------------------------------------------------
-@fast_app.post("/api/v1/analyze")
+@fast_app.post("/api/v1/analyze", response_model=AnalysisResponse)
 async def analyze_token(request: RiskRequest):
-    token = request.token_address
+    token = await resolve_query_to_address(request.query)
     now = time.time()
     
     # Check cache
     if token in response_cache:
-        cached_report, timestamp = response_cache[token]
+        cached_response, timestamp = response_cache[token]
         if now - timestamp < CACHE_TTL:
-            return {"status": "success", "report": cached_report, "cached": True}
+            return cached_response
             
     # Run the actual ADK workflow instead of mocking it
     try:
@@ -113,10 +153,21 @@ async def analyze_token(request: RiskRequest):
         logger.error(f"Error during ADK workflow: {e}")
         raise HTTPException(status_code=500, detail="Internal Server Error")
         
-    # Store in cache
-    response_cache[token] = (report, now)
+    # Extract raw data dict from the tool run
+    analytics = fetch_holder_analytics(token)
     
-    return {"status": "success", "report": report}
+    response_data = AnalysisResponse(
+        markdown_report=report,
+        top_100_concentration=analytics.get("top_100_concentration", 0.0),
+        whale_concentration=analytics.get("whale_concentration", 0.0),
+        gini_index=analytics.get("gini_index", 0.0),
+        holders=analytics.get("holders", [])
+    )
+    
+    # Store in cache
+    response_cache[token] = (response_data, now)
+    
+    return response_data
 
 # ---------------------------------------------------------------------------
 # Entry point
