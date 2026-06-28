@@ -5,6 +5,7 @@ import StatGrid from "@/components/stat-grid";
 import InsiderClusteringCard from "@/components/insider-clustering-card";
 import EscapeVelocityWidget from "@/components/escape-velocity-widget";
 import { HistoricalActivityChart } from "@/components/historical-activity-chart";
+import FundamentalAuditMatrix from "@/components/fundamental-audit-matrix";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Terminal } from "lucide-react";
@@ -71,9 +72,14 @@ export default function ResultsView({ data }: ResultsViewProps) {
       </div>
 
       {/* ── Middle Row: Insider Clustering & Historical Chart ──────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
         <InsiderClusteringCard holders={data.holders} />
         <HistoricalActivityChart data={data.historical_data} anomalies={data.anomalies} />
+      </div>
+
+      {/* ── Fundamental Audit Matrix ──────────────────────────── */}
+      <div className="mb-5">
+        <FundamentalAuditMatrix data={data.fundamental_audit} />
       </div>
 
       {/* ── Bottom Row: AI Narrative Terminal ───────────────────────── */}

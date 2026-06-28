@@ -36,7 +36,7 @@ export default function Home() {
     async (addressOverride?: string) => {
       const trimmed = (addressOverride ?? tokenAddress).trim();
       if (!trimmed) {
-        toast.error("Please enter a token contract address.");
+        toast.error("Please enter a token ticker or contract address.");
         return;
       }
 

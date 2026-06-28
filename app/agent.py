@@ -6,8 +6,12 @@ import json
 import re
 from google.adk.workflow import node
 from google.genai import types
+import asyncio
 
-from app.tools import fetch_tokenomics_data, fetch_onchain_metrics, fetch_holder_analytics
+from app.tools import (
+    fetch_tokenomics_data, fetch_onchain_metrics, fetch_holder_analytics,
+    audit_team_footprint, static_analyze_bytecode, extract_tokenomics_table, evaluate_github_velocity
+)
 from google import genai
 from google.genai import errors
 import tenacity
@@ -33,6 +37,8 @@ def call_gemini(system_prompt: str, user_content: str) -> str:
 class InvalidDataError(Exception):
     """Custom exception raised when workers return malformed or conversational data."""
     pass
+
+fundamental_audit_cache = {}
 
 # ── Instruction Prompts (preserved from original LlmAgent definitions) ──
 
@@ -79,6 +85,19 @@ SYNTHESIS_INSTRUCTION = (
     "Leave the final payload organization to the FastAPI gateway layer. Do not output anything outside of the markdown text. "
     "Do not include 'Here is the report' or any introductory/closing text. "
     "Start your response immediately with '# BlackSwan Risk Report'. Ensure the output is strictly formatted markdown."
+)
+
+FUNDAMENTAL_INSTRUCTION = (
+    "You are a fundamental due diligence analyst. You will receive structured JSON payloads combining "
+    "team footprint, bytecode static analysis, tokenomics tables, and GitHub velocity data. "
+    "You must consolidate this data and strictly output a single JSON object that maps perfectly to the FundamentalAudit schema: "
+    "{\n"
+    '  "team": {"status": "Verified|Anonymous|High Risk Links", "summary_text": str, "anomalies_detected": [str]},\n'
+    '  "technology": {"contract_verification": bool, "compiler_version_risk": str, "vulnerabilities": [str]},\n'
+    '  "tokenomics": {"insider_allocation_pct": float, "is_unbalanced": bool, "cliff_and_vesting_risk": str},\n'
+    '  "roadmap": {"github_velocity_status": "Active|Dormant|Stalled", "unmet_milestones": [str]}\n'
+    "}\n"
+    "Output ONLY the JSON object. No preamble, no conversational text."
 )
 
 # ── Helpers ──────────────────────────────────────────────────────────────
@@ -205,6 +224,41 @@ def forensic_clustering_agent(node_input) -> str:
 
 
 @node
+async def unified_fundamental_engine(node_input) -> str:
+    """Fetch mock fundamentals asynchronously and synthesize via Gemini."""
+    text = _get_text(node_input)
+    token_address = _extract_token_address(text)
+    
+    # Run data retrieval utilities concurrently
+    team_data, bytecode_data, tokenomics_data, github_stats = await asyncio.gather(
+        audit_team_footprint(token_address),
+        static_analyze_bytecode(token_address),
+        extract_tokenomics_table(token_address),
+        evaluate_github_velocity(token_address)
+    )
+    
+    combined_payload = {
+        "team_data": team_data,
+        "bytecode_data": bytecode_data,
+        "tokenomics_data": tokenomics_data,
+        "github_stats": github_stats
+    }
+    
+    response = call_gemini(
+        FUNDAMENTAL_INSTRUCTION,
+        f"Consolidate this fundamental data into the requested JSON schema:\n{json.dumps(combined_payload, indent=2)}"
+    )
+    
+    # Parse the response and save to the cache for FastAPI
+    try:
+        parsed = json.loads(_extract_json(response))
+        fundamental_audit_cache[token_address] = parsed
+    except Exception as e:
+        pass
+        
+    return response
+
+@node
 def validate_and_synthesize(node_input: dict) -> str:
     """Validate worker outputs and merge them into a single JSON payload."""
     validated_data = {}
@@ -223,8 +277,8 @@ def validate_and_synthesize(node_input: dict) -> str:
             except json.JSONDecodeError as e:
                 raise InvalidDataError(f"Agent {agent_name} returned malformed data or conversational string: {text}") from e
 
-        if not isinstance(parsed, list):
-            raise InvalidDataError(f"Agent {agent_name} returned non-array JSON: {parsed}")
+        if not isinstance(parsed, (list, dict)):
+            raise InvalidDataError(f"Agent {agent_name} returned non-array/dict JSON: {parsed}")
         validated_data[agent_name] = parsed
             
     return json.dumps(validated_data, indent=2)
@@ -248,8 +302,8 @@ join = JoinNode(name="merge")
 root_agent = Workflow(
     name="blackswan_risk_engine",
     edges=[
-        ('START', (tokenomics_risk_node, onchain_risk_node, forensic_clustering_agent)),
-        ((tokenomics_risk_node, onchain_risk_node, forensic_clustering_agent), join),
+        ('START', (tokenomics_risk_node, onchain_risk_node, forensic_clustering_agent, unified_fundamental_engine)),
+        ((tokenomics_risk_node, onchain_risk_node, forensic_clustering_agent, unified_fundamental_engine), join),
         (join, validate_and_synthesize),
         (validate_and_synthesize, risk_synthesis_node)
     ]

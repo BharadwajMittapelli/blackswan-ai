@@ -111,6 +111,31 @@ export default function ResultsSkeleton({ loadingMsgIndex }: ResultsSkeletonProp
         </div>
       </div>
 
+      {/* ── Fundamental Audit Matrix Skeleton ─────────────────────── */}
+      <div className="rounded-xl border border-slate-800 bg-slate-900 overflow-hidden mt-2 mb-2">
+        <div className="px-5 py-4 border-b border-slate-800 flex flex-col gap-4">
+          <Skeleton className="h-5 w-64 bg-slate-800" />
+          <div className="flex gap-4">
+            <Skeleton className="h-4 w-24 bg-slate-800" />
+            <Skeleton className="h-4 w-24 bg-slate-800" />
+            <Skeleton className="h-4 w-24 bg-slate-800" />
+            <Skeleton className="h-4 w-24 bg-slate-800" />
+          </div>
+        </div>
+        <div className="p-6 space-y-4">
+          <Skeleton className="h-6 w-1/3 bg-slate-800" />
+          <Skeleton className="h-4 w-3/4 bg-slate-800" />
+          <div className="flex gap-2">
+            <Skeleton className="h-8 w-24 bg-slate-800 rounded-full" />
+            <Skeleton className="h-8 w-32 bg-slate-800 rounded-full" />
+          </div>
+          <div className="pt-4 space-y-2">
+            <Skeleton className="h-4 w-full bg-slate-800" />
+            <Skeleton className="h-4 w-5/6 bg-slate-800" />
+          </div>
+        </div>
+      </div>
+
       {/* ── Bottom Row: AI Narrative skeleton ───────────────────── */}
       <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-100 bg-gray-50/60">
