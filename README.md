@@ -1,8 +1,5 @@
 # blackswan-ai
 
-Simple ReAct agent
-Agent generated with `agents-cli` version `0.5.0`
-
 ## 🚀 Key Features
 
 *   **Robust Ticker Resolution:** Automatically resolves simple coin tickers (e.g. `pepe`) into smart contract addresses via DexScreener search integration.
