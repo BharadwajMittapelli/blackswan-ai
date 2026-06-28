@@ -31,8 +31,8 @@ export default function ResultsSkeleton({ loadingMsgIndex }: ResultsSkeletonProp
         </p>
       </div>
 
-      {/* ── Top Row: Gauge + Stats ─────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-5">
+      {/* ── Top Row: Gauge + Stats + Matrix ─────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_1fr] gap-5">
         {/* Gauge skeleton */}
         <div className="rounded-xl border border-gray-200 bg-white p-5 flex flex-col items-center justify-center animate-pulse-glow">
           <Skeleton className="h-4 w-16 bg-gray-100 mb-4" />
@@ -50,6 +50,35 @@ export default function ResultsSkeleton({ loadingMsgIndex }: ResultsSkeletonProp
                 <Skeleton className="h-7 w-20 bg-gray-100" />
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Escape Velocity Widget skeleton */}
+        <div className="flex flex-col gap-3">
+          <Skeleton className="h-3 w-28 bg-gray-100 opacity-0 hidden lg:block" />
+          <div className="rounded-xl border border-slate-800 bg-slate-900 p-5 flex flex-col justify-between h-full animate-pulse">
+            <div className="flex items-center gap-2 mb-6">
+              <Skeleton className="h-4 w-4 rounded bg-slate-800" />
+              <Skeleton className="h-3 w-40 bg-slate-800" />
+            </div>
+            
+            <div className="flex flex-col gap-2 mb-6">
+              <div className="flex justify-between">
+                <Skeleton className="h-2 w-20 bg-slate-800" />
+                <Skeleton className="h-4 w-12 bg-slate-800" />
+              </div>
+              <Skeleton className="h-3 w-full bg-slate-800 rounded-full" />
+              <Skeleton className="h-2 w-48 bg-slate-800" />
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex flex-col gap-2 p-3 rounded-lg border border-slate-800/50 bg-slate-800/30">
+                  <Skeleton className="h-2 w-16 bg-slate-800" />
+                  <Skeleton className="h-4 w-12 bg-slate-800" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

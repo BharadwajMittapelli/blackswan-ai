@@ -73,6 +73,7 @@ SYNTHESIS_INSTRUCTION = (
     "Your job is to synthesize these findings into a final, professional markdown report called 'BlackSwan Risk Report'. "
     "The report must include an executive summary, a breakdown of tokenomics threats, a breakdown of on-chain threats, "
     "a section explicitly highlighting 'Insider Wallet Clustering & Developer Bundling' based on the forensic data, "
+    "a definitive 'Tactical Exit Defense Playbook' section that analyzes the mathematical exit/escape velocity metrics, "
     "and a final 'Risk Score' out of 100 based on the severity of findings.\n\n"
     "CRITICAL: You are a reporting engine. You will receive structured JSON inputs. You must compile this analysis into ONLY a Markdown report. "
     "Leave the final payload organization to the FastAPI gateway layer. Do not output anything outside of the markdown text. "

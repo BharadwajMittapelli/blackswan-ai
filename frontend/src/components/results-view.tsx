@@ -3,6 +3,7 @@
 import RiskGauge from "@/components/risk-gauge";
 import StatGrid from "@/components/stat-grid";
 import InsiderClusteringCard from "@/components/insider-clustering-card";
+import EscapeVelocityWidget from "@/components/escape-velocity-widget";
 import { HistoricalActivityChart } from "@/components/historical-activity-chart";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -36,8 +37,8 @@ export default function ResultsView({ data }: ResultsViewProps) {
 
   return (
     <div className="flex flex-col gap-5 p-6">
-      {/* ── Top Row: Gauge + Stats ─────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-5">
+      {/* ── Top Row: Gauge + Stats + Matrix ─────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_1fr] gap-5">
         {/* Gauge Card */}
         <div className="rounded-xl border border-gray-200 bg-white p-5 flex flex-col items-center justify-center">
           <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400 mb-3">
@@ -56,6 +57,16 @@ export default function ResultsView({ data }: ResultsViewProps) {
             whale={data.whale_concentration}
             gini={data.gini_index}
           />
+        </div>
+
+        {/* Escape Velocity */}
+        <div className="flex flex-col gap-3">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400 px-1 opacity-0 hidden lg:block">
+            Escape Velocity
+          </p>
+          {data.escape_velocity && (
+            <EscapeVelocityWidget data={data.escape_velocity} />
+          )}
         </div>
       </div>
 

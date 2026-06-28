@@ -29,6 +29,12 @@ class RiskRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     query: str
 
+class EscapeVelocityMetrics(BaseModel):
+    exit_bottleneck_pct: float
+    survival_probability: str
+    estimated_blocks_to_drain: int
+    recommended_slippage_pct: float
+
 class AnalysisResponse(BaseModel):
     markdown_report: str
     top_100_concentration: float
@@ -37,6 +43,7 @@ class AnalysisResponse(BaseModel):
     holders: list
     historical_data: list[dict]
     anomalies: list[dict]
+    escape_velocity: EscapeVelocityMetrics
 
 # ---------------------------------------------------------------------------
 # ADK Runner (singleton, reused across requests)
@@ -165,7 +172,13 @@ async def analyze_token(request: RiskRequest):
         gini_index=analytics.get("gini_index", 0.0),
         holders=analytics.get("holders", []),
         historical_data=analytics.get("historical_data", []),
-        anomalies=analytics.get("anomalies", [])
+        anomalies=analytics.get("anomalies", []),
+        escape_velocity=analytics.get("escape_velocity", {
+            "exit_bottleneck_pct": 0.0,
+            "survival_probability": "Stable",
+            "estimated_blocks_to_drain": 0,
+            "recommended_slippage_pct": 0.0
+        })
     )
     
     # Store in cache
