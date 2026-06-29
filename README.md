@@ -5,6 +5,8 @@
 *   **Robust Ticker Resolution:** Automatically resolves simple coin tickers (e.g. `pepe`) into smart contract addresses via DexScreener search integration.
 *   **Institutional Fundamental Audit Matrix:** A 4-tab UI component (Team, Technology, Tokenomics, Roadmap) with live status badges, anomaly detection, and contract bytecode verification.
 *   **On-Chain Risk & Escape Velocity Metrics:** Analyzes insider liquidity dumps, calculates estimated blocks to drain, and renders survival probabilities.
+*   **Syntax Diagnostic Explorer:** A purely data-driven, Master-Detail interface providing isolated code snippets alongside structural syntax analysis and optimization guidelines.
+*   **Deterministic Demo Sandboxing:** Template interception natively routes known mockup addresses (e.g., Reentrancy Vault, Ungated Mint) to hardcoded static analysis targets, ensuring maximum demonstration stability.
 *   **Holder Forensics:** Insider clustering flags dynamically track coordinated whale actions across wallets.
 *   **Defensive API & UI Fallbacks:** Advanced rate-limit safeguards natively integrated into the ADK engine, rendering graceful placeholder UIs on the frontend instead of crashing.
 
@@ -15,13 +17,19 @@ blackswan-ai/
 ├── app/                       # Core agent backend (FastAPI + ADK workflow)
 │   ├── agent.py               # Main ReAct agent workflow logic
 │   ├── config.py              # App configurations and API keys
-│   ├── fast_api_app.py        # FastAPI REST API gateway
-│   ├── tools.py               # On-chain data fetching & mock forensics
+│   ├── fast_api_app.py        # FastAPI REST API gateway (w/ Template Interception)
+│   ├── schemas.py             # Strict Pydantic models (ProjectDiligenceMatrix, etc.)
+│   ├── core/
+│   │   ├── agent_node.py      # LLM synthesis and semantic processing
+│   │   └── rag_engine.py      # Context slicing & RAG pipelines
+│   ├── tools/
+│   │   ├── __init__.py
+│   │   └── static_analyzer.py # Structural syntax parsing & regex block extraction
 │   └── app_utils/             # App utilities and helpers
 ├── frontend/                  # Next.js 15 (App Router) Dashboard
 │   ├── src/
 │   │   ├── app/               # Router pages & global CSS stylesheets
-│   │   ├── components/        # Flyrank-inspired light-theme dashboard panels
+│   │   ├── components/        # Flyrank-inspired dark-theme dashboard panels
 │   │   │   ├── ui/            # Shadcn UI primitives (card, chart, input, button)
 │   │   │   ├── empty-state.tsx
 │   │   │   ├── error-state.tsx
@@ -31,7 +39,7 @@ blackswan-ai/
 │   │   │   ├── insider-clustering-card.tsx
 │   │   │   ├── results-skeleton.tsx
 │   │   │   ├── results-view.tsx
-│   │   │   ├── risk-gauge.tsx
+│   │   │   ├── syntax-diagnostic-explorer.tsx # Master-Detail code annotation UI
 │   │   │   └── stat-grid.tsx
 │   │   └── lib/
 │   │       └── types.ts       # Shared TypeScript type definitions
