@@ -1,6 +1,5 @@
 "use client";
 
-import RiskGauge from "@/components/risk-gauge";
 import StatGrid from "@/components/stat-grid";
 import InsiderClusteringCard from "@/components/insider-clustering-card";
 import EscapeVelocityWidget from "@/components/escape-velocity-widget";
@@ -10,43 +9,17 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Terminal } from "lucide-react";
 import type { AnalysisResponse } from "@/lib/types";
-
-/* ── Extract the risk score from the markdown report ──────────────── */
-function extractRiskScore(report: string): number {
-  const patterns = [
-    /risk\s*score[:\s]*(\d{1,3})\s*(?:\/\s*100)?/i,
-    /\*\*(\d{1,3})\/100\*\*/i,
-    /(\d{1,3})\s*\/\s*100/i,
-    /score[:\s]*(\d{1,3})/i,
-  ];
-  for (const pat of patterns) {
-    const match = report.match(pat);
-    if (match) {
-      const num = parseInt(match[1], 10);
-      if (num >= 0 && num <= 100) return num;
-    }
-  }
-  return 65;
-}
+import SyntaxDiagnosticExplorer from "@/components/syntax-diagnostic-explorer";
 
 interface ResultsViewProps {
   data: AnalysisResponse;
 }
 
 export default function ResultsView({ data }: ResultsViewProps) {
-  const score = extractRiskScore(data.markdown_report);
-
   return (
     <div className="flex flex-col gap-5 p-6">
-      {/* ── Top Row: Gauge + Stats + Matrix ─────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_1fr] gap-5">
-        {/* Gauge Card */}
-        <div className="rounded-xl border border-gray-200 bg-white p-5 flex flex-col items-center justify-center">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400 mb-3">
-            Risk Score
-          </p>
-          <RiskGauge score={score} />
-        </div>
+      {/* ── Top Row: Stats + Escape Velocity ─────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         {/* Stats */}
         <div className="flex flex-col gap-3">
@@ -77,9 +50,10 @@ export default function ResultsView({ data }: ResultsViewProps) {
         <HistoricalActivityChart data={data.historical_data} anomalies={data.anomalies} />
       </div>
 
-      {/* ── Fundamental Audit Matrix ──────────────────────────── */}
-      <div className="mb-5">
+      {/* ── Fundamental Audit Matrix & Syntax Explorer ──────────────────────────── */}
+      <div className="mb-5 flex flex-col gap-5">
         <FundamentalAuditMatrix data={data.fundamental_audit} />
+        <SyntaxDiagnosticExplorer data={data.diligence_matrix} />
       </div>
 
       {/* ── Bottom Row: AI Narrative Terminal ───────────────────────── */}

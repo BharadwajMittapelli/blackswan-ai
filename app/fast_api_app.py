@@ -25,51 +25,10 @@ logging.basicConfig(level=logging.INFO)
 # ---------------------------------------------------------------------------
 # Pydantic request model – strict: rejects any extra / unexpected fields
 # ---------------------------------------------------------------------------
-class RiskRequest(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    query: str
-
-class EscapeVelocityMetrics(BaseModel):
-    exit_bottleneck_pct: float
-    survival_probability: str
-    estimated_blocks_to_drain: int
-    recommended_slippage_pct: float
-
-class TeamAudit(BaseModel):
-    status: str
-    summary_text: str
-    anomalies_detected: list[str]
-
-class TechnologyAudit(BaseModel):
-    contract_verification: bool
-    compiler_version_risk: str
-    vulnerabilities: list[str]
-
-class TokenomicsAudit(BaseModel):
-    insider_allocation_pct: float
-    is_unbalanced: bool
-    cliff_and_vesting_risk: str
-
-class RoadmapAudit(BaseModel):
-    github_velocity_status: str
-    unmet_milestones: list[str]
-
-class FundamentalAudit(BaseModel):
-    team: TeamAudit
-    technology: TechnologyAudit
-    tokenomics: TokenomicsAudit
-    roadmap: RoadmapAudit
-
-class AnalysisResponse(BaseModel):
-    markdown_report: str
-    top_100_concentration: float
-    whale_concentration: float
-    gini_index: float
-    holders: list
-    historical_data: list[dict]
-    anomalies: list[dict]
-    escape_velocity: EscapeVelocityMetrics
-    fundamental_audit: FundamentalAudit
+from app.schemas import (
+    RiskRequest, EscapeVelocityMetrics, TeamAudit, TechnologyAudit,
+    TokenomicsAudit, RoadmapAudit, FundamentalAudit, AnalysisResponse
+)
 
 # ---------------------------------------------------------------------------
 # ADK Runner (singleton, reused across requests)
@@ -214,6 +173,37 @@ async def analyze_token(request: RiskRequest):
         }
     })
     
+    # 1. Template Interception for Demo Profiles
+    # Map requested tokens to mock target addresses for demonstration purposes
+    DEMO_PROFILES = {
+        "0xreentrancyvault000000000000000000000000": "reentrancy_vault",
+        "0xungatedminttoken0000000000000000000000": "ungated_mint",
+        "0xsecureerc20asset0000000000000000000000": "secure_asset"
+    }
+    
+    # If the user didn't request a specific demo profile, fallback to the secure asset as default for the demo
+    demo_profile = DEMO_PROFILES.get(token.lower(), "secure_asset")
+    
+    # 2. Hardcode Clean Source Targets (handled inside get_demo_source)
+    from app.tools.static_analyzer import get_demo_source
+    from app.core.agent_node import code_annotation_node
+    import json
+    
+    target_code = get_demo_source(demo_profile)
+
+    try:
+        raw_diligence = await code_annotation_node(target_code)
+        diligence_matrix = json.loads(raw_diligence)
+    except Exception as e:
+        logger.error(f"Error during code annotation pipeline: {e}")
+        diligence_matrix = {
+            "origin_classification_source": "System Default",
+            "is_source_verified": False,
+            "distribution_ratio_pct": 0.0,
+            "has_extended_features": False,
+            "syntax_annotations": []
+        }
+    
     response_data = AnalysisResponse(
         markdown_report=report,
         top_100_concentration=analytics.get("top_100_concentration", 0.0),
@@ -228,7 +218,8 @@ async def analyze_token(request: RiskRequest):
             "estimated_blocks_to_drain": 0,
             "recommended_slippage_pct": 0.0
         }),
-        fundamental_audit=fund_audit
+        fundamental_audit=fund_audit,
+        diligence_matrix=diligence_matrix
     )
     
     # Store in cache
