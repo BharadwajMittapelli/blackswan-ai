@@ -2,7 +2,7 @@
 
 ## 🚀 Key Features
 
-*   **Robust Ticker Resolution:** Automatically resolves simple coin tickers (e.g. `pepe`) into smart contract addresses via DexScreener search integration.
+*   **Robust Ticker Resolution:** Automatically resolves simple coin tickers (e.g. `Bitcoin`, `Ethereum`, `pepe` ) into smart contract addresses via DexScreener search integration.
 *   **Institutional Fundamental Audit Matrix:** A 4-tab UI component (Team, Technology, Tokenomics, Roadmap) with live status badges, anomaly detection, and contract bytecode verification.
 *   **On-Chain Risk & Escape Velocity Metrics:** Analyzes insider liquidity dumps, calculates estimated blocks to drain, and renders survival probabilities.
 *   **Syntax Diagnostic Explorer:** A purely data-driven, Master-Detail interface providing isolated code snippets alongside structural syntax analysis and optimization guidelines.
