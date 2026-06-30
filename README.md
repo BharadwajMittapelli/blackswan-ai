@@ -10,6 +10,13 @@
 *   **Holder Forensics:** Insider clustering flags dynamically track coordinated whale actions across wallets.
 *   **Defensive API & UI Fallbacks:** Advanced rate-limit safeguards natively integrated into the ADK engine, rendering graceful placeholder UIs on the frontend instead of crashing.
 
+## 🛡️ Production Readiness & Security
+The BlackSwan engine recently underwent a targeted production audit ensuring maximum stability and deployment safety:
+*   **Dynamic API Routing:** Frontend dynamically adapts via `NEXT_PUBLIC_API_URL` with robust abstraction ensuring local and staging continuity without hardcoded endpoints.
+*   **Strict Typescript & Linting Compliance:** Fully zeroed-out implicit `any` assignments, optimized React component static rendering (resolved hook lifecycle errors), and strict interface propagation across the Next.js stack.
+*   **CORS Lockout Safeguards:** Explicitly configured FastAPI middleware `allow_origins` seamlessly bridging wildcard pre-flight requirements alongside local development layers.
+*   **WalletConnect Resilience:** Wagmi/RainbowKit instances are insulated against environment dropouts via active fallbacks pointing to robust operational test-networks to ensure continuous UI function.
+
 ## Project Structure
 
 ```
