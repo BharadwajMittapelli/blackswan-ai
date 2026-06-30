@@ -3,12 +3,15 @@
 import { Search, ArrowRight, ShieldAlert } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
+import { useMockAccount } from "@/lib/use-mock-account";
 
 interface HeaderProps {
   tokenAddress: string;
   loading: boolean;
   onAddressChange: (value: string) => void;
   onScan: () => void;
+  onHome?: () => void;
 }
 
 export default function Header({
@@ -16,12 +19,19 @@ export default function Header({
   loading,
   onAddressChange,
   onScan,
+  onHome,
 }: HeaderProps) {
+  const pathname = usePathname();
+  const { isConnected, connect, disconnect, address } = useMockAccount();
+
   return (
     <header className="sticky top-0 z-30 w-full border-b border-gray-200 bg-white/80 backdrop-blur-xl">
       <div className="flex items-center gap-4 px-6 py-3">
         {/* ── Brand ──────────────────────────────────────────────── */}
-        <div className="flex items-center gap-2.5 mr-4 shrink-0">
+        <div 
+          className="flex items-center gap-2.5 mr-4 shrink-0 cursor-pointer" 
+          onClick={onHome}
+        >
           <div className="relative">
             <ShieldAlert className="h-7 w-7 text-[#42705e]" strokeWidth={1.5} />
             <div className="absolute -top-0.5 -right-0.5 h-2 w-2 bg-emerald-500 rounded-full border-2 border-white animate-pulse" />
@@ -69,6 +79,25 @@ export default function Header({
             </span>
           )}
         </Button>
+        {/* ── Mock Wallet Connection Button ────────────────────────── */}
+        <div className="hidden sm:block">
+          {isConnected ? (
+            <button
+              onClick={disconnect}
+              className="bg-slate-900 border border-slate-800 text-white font-semibold text-sm px-4 py-2 rounded-xl shadow-sm hover:border-[#10b981] transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <div className="w-2 h-2 rounded-full bg-[#10b981]" />
+              {address}
+            </button>
+          ) : (
+            <button
+              onClick={connect}
+              className="bg-[#10b981] hover:bg-[#059669] text-white font-bold text-sm px-4 py-2 rounded-xl shadow-sm transition-colors cursor-pointer"
+            >
+              Mock Connect Wallet
+            </button>
+          )}
+        </div>
       </div>
     </header>
   );
