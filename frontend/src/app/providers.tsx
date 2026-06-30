@@ -13,7 +13,7 @@ import "@rainbow-me/rainbowkit/styles.css";
 
 const config = getDefaultConfig({
   appName: "BlackSwan AI",
-  projectId: "87106bd465234d097b8a51ba585bf799", // Dummy 32-char hex ID for WalletConnect v2
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || "87106bd465234d097b8a51ba585bf799", // Dummy 32-char hex ID for WalletConnect v2
   chains: [mainnet, polygon, optimism, arbitrum, base],
   ssr: true,
 });

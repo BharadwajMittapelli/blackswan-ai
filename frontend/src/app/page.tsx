@@ -12,7 +12,7 @@ import ResultsView from "@/components/results-view";
 import ErrorState from "@/components/error-state";
 import type { AnalysisResponse } from "@/lib/types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 /* ══════════════════════════════════════════════════════════════════════ */
 /*  Risk Command Center                                                  */
@@ -58,7 +58,7 @@ export default function Home() {
       setLoadingMsgIndex(0);
 
       try {
-        const res = await fetch(`${API_URL}/api/v1/analyze`, {
+        const res = await fetch(`${API_BASE_URL}/api/v1/analyze`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: trimmed }),
@@ -79,9 +79,10 @@ export default function Home() {
         }
 
         setData(json as AnalysisResponse);
-      } catch (err: any) {
-        setError(err.message || "Analysis failed. Please check the contract address and try again.");
-        toast.error(err.message || "Analysis failed.");
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Analysis failed.";
+        setError(message || "Analysis failed. Please check the contract address and try again.");
+        toast.error(message || "Analysis failed.");
       } finally {
         setLoading(false);
       }

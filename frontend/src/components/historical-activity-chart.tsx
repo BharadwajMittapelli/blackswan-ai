@@ -33,55 +33,56 @@ const chartConfig = {
   },
 };
 
-export function HistoricalActivityChart({ data, anomalies }: HistoricalActivityChartProps) {
-  // Custom Tooltip Renderer
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
-      const currentAnomaly = anomalies.find((a) => a.date === label);
-      
-      return (
-        <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-md max-w-[240px]">
-          <p className="text-xs font-bold text-gray-500 mb-2">{label}</p>
-          
-          <div className="flex flex-col gap-1.5 mb-3">
-            {payload.map((entry: any) => (
-              <div key={entry.name} className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-1.5">
-                  <div 
-                    className="w-2 h-2 rounded-full" 
-                    style={{ backgroundColor: entry.color }} 
-                  />
-                  <span className="text-[10px] uppercase font-semibold text-gray-500">
-                    {entry.name === "volume" ? "Volume" : "Tx Count"}
-                  </span>
-                </div>
-                <span className="text-xs font-bold text-gray-800 tabular-nums">
-                  {entry.name === "volume" 
-                    ? `$${(entry.value / 1000).toFixed(0)}k` 
-                    : entry.value}
+// Custom Tooltip Renderer
+const CustomTooltip = ({ active, payload, label, anomalies }: { active?: boolean; payload?: { name: string; color: string; value: number }[]; label?: string; anomalies: Anomaly[] }) => {
+  if (active && payload && payload.length) {
+    const currentAnomaly = anomalies.find((a) => a.date === label);
+    
+    return (
+      <div className="rounded-xl border border-gray-200 bg-white p-3 shadow-md max-w-[240px]">
+        <p className="text-xs font-bold text-gray-500 mb-2">{label}</p>
+        
+        <div className="flex flex-col gap-1.5 mb-3">
+          {payload.map((entry) => (
+            <div key={entry.name} className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-1.5">
+                <div 
+                  className="w-2 h-2 rounded-full" 
+                  style={{ backgroundColor: entry.color }} 
+                />
+                <span className="text-[10px] uppercase font-semibold text-gray-500">
+                  {entry.name === "volume" ? "Volume" : "Tx Count"}
                 </span>
               </div>
-            ))}
-          </div>
-
-          {currentAnomaly && (
-            <div className="mt-2 rounded-md bg-rose-50 border border-rose-200 p-2">
-              <div className="flex items-center gap-1.5 mb-1">
-                <AlertTriangle className="h-3 w-3 text-rose-600" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700">
-                  {currentAnomaly.type}
-                </span>
-              </div>
-              <p className="text-[10px] leading-tight text-rose-600">
-                {currentAnomaly.description}
-              </p>
+              <span className="text-xs font-bold text-gray-800 tabular-nums">
+                {entry.name === "volume" 
+                  ? `$${(entry.value / 1000).toFixed(0)}k` 
+                  : entry.value}
+              </span>
             </div>
-          )}
+          ))}
         </div>
-      );
-    }
-    return null;
-  };
+
+        {currentAnomaly && (
+          <div className="mt-2 rounded-md bg-rose-50 border border-rose-200 p-2">
+            <div className="flex items-center gap-1.5 mb-1">
+              <AlertTriangle className="h-3 w-3 text-rose-600" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700">
+                {currentAnomaly.type}
+              </span>
+            </div>
+            <p className="text-[10px] leading-tight text-rose-600">
+              {currentAnomaly.description}
+            </p>
+          </div>
+        )}
+      </div>
+    );
+  }
+  return null;
+};
+
+export function HistoricalActivityChart({ data, anomalies }: HistoricalActivityChartProps) {
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-5 flex flex-col w-full h-full">
@@ -126,7 +127,7 @@ export function HistoricalActivityChart({ data, anomalies }: HistoricalActivityC
             width={35}
           />
           
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
+          <Tooltip content={<CustomTooltip anomalies={anomalies} />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
           
           {/* Anomalies Reference Lines */}
           {anomalies.map((anomaly, idx) => (

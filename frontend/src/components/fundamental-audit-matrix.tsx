@@ -43,7 +43,7 @@ export default function FundamentalAuditMatrix({ data }: MatrixProps) {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as "team" | "technology" | "tokenomics" | "roadmap")}
               className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all border-b-2 ${
                 activeTab === tab.id
                   ? "border-emerald-500 text-emerald-400 bg-slate-800/50"

@@ -21,7 +21,6 @@ export default function Header({
   onScan,
   onHome,
 }: HeaderProps) {
-  const pathname = usePathname();
   const { isConnected, connect, disconnect, address } = useMockAccount();
 
   return (
