@@ -186,13 +186,13 @@ async def analyze_token(request: RiskRequest):
     
     # 2. Hardcode Clean Source Targets (handled inside get_demo_source)
     from app.tools.static_analyzer import get_demo_source
-    from app.core.agent_node import code_annotation_node
+    from app.core.agent_node import execute_code_annotation
     import json
     
     target_code = get_demo_source(demo_profile)
 
     try:
-        raw_diligence = await code_annotation_node(target_code)
+        raw_diligence = await execute_code_annotation(target_code)
         diligence_matrix = json.loads(raw_diligence)
     except Exception as e:
         logger.error(f"Error during code annotation pipeline: {e}")

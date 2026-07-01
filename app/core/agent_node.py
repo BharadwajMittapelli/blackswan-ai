@@ -39,8 +39,7 @@ def call_gemini_structured(user_content: str) -> str:
     )
     return response.text
 
-@node
-async def code_annotation_node(node_input) -> str:
+async def execute_code_annotation(node_input) -> str:
     """
     Single-pass execution node for Code Annotation and Structural Documentation.
     Parses source code, slices context, and synthesis documentation via Gemini.
@@ -67,3 +66,7 @@ async def code_annotation_node(node_input) -> str:
     gemini_response = call_gemini_structured(json.dumps(user_payload, indent=2))
     
     return gemini_response
+
+@node
+async def code_annotation_node(node_input) -> str:
+    return await execute_code_annotation(node_input)
