@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { useMockAccount } from "@/lib/use-mock-account";
+import TokenSearch, { POPULAR_TOKENS } from "./TokenSearch";
 
 interface HeaderProps {
   tokenAddress: string;
@@ -47,15 +48,13 @@ export default function Header({
 
         {/* ── Search Bar ─────────────────────────────────────────── */}
         <div className="relative flex-1 max-w-2xl">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            id="token-address-input"
-            placeholder="Enter token ticker or contract address (e.g., PEPE, WIF, or 0x...)"
+          <TokenSearch
+            tokens={POPULAR_TOKENS}
             value={tokenAddress}
-            onChange={(e) => onAddressChange(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && onScan()}
-            className="pl-10 h-10 text-sm font-semibold text-gray-900 bg-gray-50 border-gray-200 placeholder:text-gray-400 focus-visible:ring-[#42705e]/30 rounded-lg"
-            disabled={loading}
+            onChange={onAddressChange}
+            onSelect={onAddressChange}
+            onScan={onScan}
+            className="pl-10 h-10 text-sm font-semibold text-gray-900 bg-gray-50 border-gray-200 placeholder:text-gray-400 focus-visible:ring-[#42705e]/30 rounded-lg w-full"
           />
         </div>
 

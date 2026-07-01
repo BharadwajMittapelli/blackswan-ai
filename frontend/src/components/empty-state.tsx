@@ -4,6 +4,8 @@ import { ShieldAlert, AlertTriangle, Activity, Lock, Search, ArrowRight } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+import TokenSearch, { TokenOption, POPULAR_TOKENS } from "./TokenSearch";
+
 const TIPS = [
   {
     icon: AlertTriangle,
@@ -62,18 +64,16 @@ export default function EmptyState({ tokenAddress, onAddressChange, onScan }: Em
 
       {/* ── Search Bar ──────────────────────────────────────────────── */}
       <div className="w-full relative flex items-center mb-12 shadow-sm rounded-xl">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-        <Input
-          id="hero-token-input"
-          placeholder="Enter token ticker or contract address (e.g., PEPE, WIF, or 0x...)"
+        <TokenSearch
+          tokens={POPULAR_TOKENS}
           value={tokenAddress}
-          onChange={(e) => onAddressChange(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && onScan()}
-          className="pl-12 pr-24 h-14 text-base font-semibold text-gray-900 bg-white border-gray-200 placeholder:text-gray-400 focus-visible:ring-[#42705e]/30 rounded-xl"
+          onChange={onAddressChange}
+          onSelect={onAddressChange}
+          onScan={onScan}
         />
         <Button
           onClick={onScan}
-          className="absolute right-1.5 h-11 px-5 text-sm font-semibold bg-[#42705e] hover:bg-[#376251] text-white rounded-lg transition-all duration-200 cursor-pointer shadow-sm"
+          className="absolute right-1.5 h-11 px-5 text-sm font-semibold bg-[#42705e] hover:bg-[#376251] text-white rounded-lg transition-all duration-200 cursor-pointer shadow-sm z-10"
         >
           <span className="flex items-center gap-2">
             Scan
