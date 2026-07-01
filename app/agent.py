@@ -130,6 +130,24 @@ def _extract_token_address(text: str) -> str:
     if match:
         return match.group(0)
         
+    # 4. Attempt to resolve via DexScreener search
+    import requests
+    query = text.strip()
+    if query:
+        search_url = f"https://api.dexscreener.com/latest/dex/search?q={query}"
+        try:
+            resp = requests.get(search_url, timeout=10)
+            if resp.status_code == 200:
+                data = resp.json()
+                pairs = data.get("pairs", [])
+                if pairs:
+                    # Return the base token address of the top pair
+                    token_address = pairs[0].get("baseToken", {}).get("address", "")
+                    if token_address:
+                        return token_address
+        except Exception:
+            pass
+
     raise ValueError(f"Could not extract token address from: {text}")
 
 
